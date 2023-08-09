@@ -4,7 +4,6 @@ import requests
 from prophet.serialize import model_from_json
 import pandas as pd
 from streamlit_lottie import st_lottie
-import pickle
 from pathlib import Path
 import streamlit_authenticator as stauth
 
