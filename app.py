@@ -6,7 +6,7 @@ from streamlit_lottie import st_lottie
 from pathlib import Path
 import streamlit_authenticator as stauth
 from datetime import datetime, timedelta
-
+import time
 
 # ------ MODEL PROCESSING -----------
 
@@ -18,8 +18,12 @@ def load_lottie(url):
     return r.json()
 
 
-lottie = load_lottie(
-    "https://lottie.host/3851bc3d-8d2f-4e77-9a25-ba4ee6ae33a4/rpjbRrXp7d.json"
+lottie1 = load_lottie(
+    "https://lottie.host/0fe72a0d-19b4-4cf1-b805-81c1436960ef/pObPi3K16F.json"
+)
+
+lottie2 = load_lottie(
+    "https://lottie.host/bc11374a-eb53-4a24-9204-78a3e7ff54c0/50dcPFMMSl.json"
 )
 
 
@@ -60,160 +64,169 @@ with st.container():
 
 with st.container():
     st.write("---")
-    l_col, r_col = st.columns(2)
-    with l_col:
-        st.title("Welcome Assin Cafe :maple_leaf:!")
-        choosenItem = st.selectbox(
-            "please chose the item to forecast",
-            ["Iced Tea", "Yousfi", "Cascara", "Cold Brew", "Brew Tea"],
+    st.title("Welcome Assin Cafe :maple_leaf:!")
+    choosenItem = st.selectbox(
+        "please chose the item to forecast",
+        ["Choose Item", "Iced Tea", "Yousfi", "Cascara", "Cold Brew", "Brew Tea"],
+    )
+
+    if choosenItem == "Brew Tea":
+        with open("بروتي-.json", "r") as fin:
+            final_model = model_from_json(fin.read())
+        d = st.date_input(
+            "Please choose a date to forecast",
+            today,
+            min_limit,
+            max_limit,
+            format="YYYY-MM-DD",
         )
-        if choosenItem == "Brew Tea":
-            with open("بروتي-.json", "r") as fin:
-                final_model = model_from_json(fin.read())
-            d = st.date_input(
-                "Please choose a date to forecast",
-                today,
-                min_limit,
-                max_limit,
-                format="YYYY-MM-DD",
-            )
-            st.write("##")
-            st.subheader("Here is the result	:medal:")
-            item = {
-                "ds": d,
-                "day_of_week": d.weekday(),
-                "month": d.month,
-                "day_month": d.day,
-            }
-            df = pd.DataFrame([item.values()], columns=item.keys())
-            result = final_model.predict(df)
-            result = result[["yhat", "yhat_lower", "yhat_upper"]]
-            only_y = result["yhat"].iloc[0]
-            only_y = round(only_y)
-            only_u = result["yhat_upper"].iloc[0]
-            only_u = round(only_u)
-            st.metric(
-                label="Inshallah", value=f"{only_y} - {only_u} Pieces", delta=" 1.1% "
-            )
+        if d != datetime.date(today):
+            with st.empty():
+                for seconds in range(5):
+                    if seconds == 0:
+                        st_lottie(lottie1, height=200, key="loading")
+                    time.sleep(1)
+                for seconds in range(2):
+                    if seconds == 0:
+                        st_lottie(lottie2, height=200, key="finished")
+                    time.sleep(1)
+                
+                # st.warning(' This is a warning', icon="⚠️")
+                st.write("##")
+                st.subheader("Here is the result	:medal:")
+                item = {
+                    "ds": d,
+                    "day_of_week": d.weekday(),
+                    "month": d.month,
+                    "day_month": d.day,
+                }
+                df = pd.DataFrame([item.values()], columns=item.keys())
+                result = final_model.predict(df)
+                result = result[["yhat", "yhat_lower", "yhat_upper"]]
+                only_y = result["yhat"].iloc[0]
+                only_y = round(only_y)
+                only_u = result["yhat_upper"].iloc[0]
+                only_u = round(only_u)
+                st.metric(
+                    label="Inshallah", value=f"{only_y} - {only_u} Pieces", delta=" 1.1% "
+                )
 
-        if choosenItem == "Cold Brew":
-            with open("كولد برو-.json", "r") as fin:
-                final_model = model_from_json(fin.read())
-            d = st.date_input(
-                "Please choose a date to forecast",
-                today,
-                min_limit,
-                max_limit,
-                format="YYYY-MM-DD",
-            )
-            st.write("##")
-            st.subheader("Here is the result	:medal:")
-            item = {
-                "ds": d,
-                "day_of_week": d.weekday(),
-                "month": d.month,
-                "day_month": d.day,
-            }
-            df = pd.DataFrame([item.values()], columns=item.keys())
-            result = final_model.predict(df)
-            result = result[["yhat", "yhat_lower", "yhat_upper"]]
-            only_y = result["yhat"].iloc[0]
-            only_y = round(only_y)
-            only_u = result["yhat_upper"].iloc[0]
-            only_u = round(only_u)
-            st.metric(
-                label="Inshallah", value=f"{only_y} - {only_u} Pieces", delta=" 1.1% "
-            )
+    if choosenItem == "Cold Brew":
+        with open("كولد برو-.json", "r") as fin:
+            final_model = model_from_json(fin.read())
+        d = st.date_input(
+            "Please choose a date to forecast",
+            today,
+            min_limit,
+            max_limit,
+            format="YYYY-MM-DD",
+        )
+        st.write("##")
+        st.subheader("Here is the result	:medal:")
+        item = {
+            "ds": d,
+            "day_of_week": d.weekday(),
+            "month": d.month,
+            "day_month": d.day,
+        }
+        df = pd.DataFrame([item.values()], columns=item.keys())
+        result = final_model.predict(df)
+        result = result[["yhat", "yhat_lower", "yhat_upper"]]
+        only_y = result["yhat"].iloc[0]
+        only_y = round(only_y)
+        only_u = result["yhat_upper"].iloc[0]
+        only_u = round(only_u)
+        st.metric(
+            label="Inshallah", value=f"{only_y} - {only_u} Pieces", delta=" 1.1% "
+        )
 
-        if choosenItem == "Iced Tea":
-            with open("شاي مثلج - توت ورمان-.json", "r") as fin:
-                final_model = model_from_json(fin.read())
-            d = st.date_input(
-                "Please choose a date to forecast",
-                today,
-                min_limit,
-                max_limit,
-                format="YYYY-MM-DD",
-            )
-            st.write("##")
-            st.subheader("Here is the result	:medal:")
-            item = {
-                "ds": d,
-                "day_of_week": d.weekday(),
-                "month": d.month,
-                "day_month": d.day,
-            }
-            df = pd.DataFrame([item.values()], columns=item.keys())
-            result = final_model.predict(df)
-            result = result[["yhat", "yhat_lower", "yhat_upper"]]
-            only_y = result["yhat"].iloc[0]
-            only_y = round(only_y)
-            only_u = result["yhat_upper"].iloc[0]
-            only_u = round(only_u)
-            st.metric(
-                label="Inshallah", value=f"{only_y} - {only_u} Pieces", delta=" 1.1% "
-            )
+    if choosenItem == "Iced Tea":
+        with open("شاي مثلج - توت ورمان-.json", "r") as fin:
+            final_model = model_from_json(fin.read())
+        d = st.date_input(
+            "Please choose a date to forecast",
+            today,
+            min_limit,
+            max_limit,
+            format="YYYY-MM-DD",
+        )
+        st.write("##")
+        st.subheader("Here is the result	:medal:")
+        item = {
+            "ds": d,
+            "day_of_week": d.weekday(),
+            "month": d.month,
+            "day_month": d.day,
+        }
+        df = pd.DataFrame([item.values()], columns=item.keys())
+        result = final_model.predict(df)
+        result = result[["yhat", "yhat_lower", "yhat_upper"]]
+        only_y = result["yhat"].iloc[0]
+        only_y = round(only_y)
+        only_u = result["yhat_upper"].iloc[0]
+        only_u = round(only_u)
+        st.metric(
+            label="Inshallah", value=f"{only_y} - {only_u} Pieces", delta=" 1.1% "
+        )
 
-        if choosenItem == "Yousfi":
-            with open("شاي مثلج - يوسفي-.json", "r") as fin:
-                final_model = model_from_json(fin.read())
-            d = st.date_input(
-                "Please choose a date to forecast",
-                today,
-                min_limit,
-                max_limit,
-                format="YYYY-MM-DD",
-            )
-            st.write("##")
-            st.subheader("Here is the result	:medal:")
-            item = {
-                "ds": d,
-                "day_of_week": d.weekday(),
-                "month": d.month,
-                "day_month": d.day,
-            }
-            df = pd.DataFrame([item.values()], columns=item.keys())
-            result = final_model.predict(df)
-            result = result[["yhat", "yhat_lower", "yhat_upper"]]
-            only_y = result["yhat"].iloc[0]
-            only_y = round(only_y)
-            only_u = result["yhat_upper"].iloc[0]
-            only_u = round(only_u)
-            st.metric(
-                label="Inshallah", value=f"{only_y} - {only_u} Pieces", delta=" 1.1% "
-            )
+    if choosenItem == "Yousfi":
+        with open("شاي مثلج - يوسفي-.json", "r") as fin:
+            final_model = model_from_json(fin.read())
+        d = st.date_input(
+            "Please choose a date to forecast",
+            today,
+            min_limit,
+            max_limit,
+            format="YYYY-MM-DD",
+        )
+        st.write("##")
+        st.subheader("Here is the result	:medal:")
+        item = {
+            "ds": d,
+            "day_of_week": d.weekday(),
+            "month": d.month,
+            "day_month": d.day,
+        }
+        df = pd.DataFrame([item.values()], columns=item.keys())
+        result = final_model.predict(df)
+        result = result[["yhat", "yhat_lower", "yhat_upper"]]
+        only_y = result["yhat"].iloc[0]
+        only_y = round(only_y)
+        only_u = result["yhat_upper"].iloc[0]
+        only_u = round(only_u)
+        st.metric(
+            label="Inshallah", value=f"{only_y} - {only_u} Pieces", delta=" 1.1% "
+        )
 
-        if choosenItem == "Cascara":
-            with open("كاسكارا-.json", "r") as fin:
-                final_model = model_from_json(fin.read())
-            d = st.date_input(
-                "Please choose a date to forecast",
-                today,
-                min_limit,
-                max_limit,
-                format="YYYY-MM-DD",
-            )
-            st.write("##")
-            st.subheader("Here is the result	:medal:")
-            item = {
-                "ds": d,
-                "day_of_week": d.weekday(),
-                "month": d.month,
-                "day_month": d.day,
-            }
-            df = pd.DataFrame([item.values()], columns=item.keys())
-            result = final_model.predict(df)
-            result = result[["yhat", "yhat_lower", "yhat_upper"]]
-            only_y = result["yhat"].iloc[0]
-            only_y = round(only_y)
-            only_u = result["yhat_upper"].iloc[0]
-            only_u = round(only_u)
-            st.metric(
-                label="Inshallah", value=f"{only_y} - {only_u} Pieces", delta=" 1.1% "
-            )
+    if choosenItem == "Cascara":
+        with open("كاسكارا-.json", "r") as fin:
+            final_model = model_from_json(fin.read())
+        d = st.date_input(
+            "Please choose a date to forecast",
+            today,
+            min_limit,
+            max_limit,
+            format="YYYY-MM-DD",
+        )
+        st.write("##")
+        st.subheader("Here is the result	:medal:")
+        item = {
+            "ds": d,
+            "day_of_week": d.weekday(),
+            "month": d.month,
+            "day_month": d.day,
+        }
+        df = pd.DataFrame([item.values()], columns=item.keys())
+        result = final_model.predict(df)
+        result = result[["yhat", "yhat_lower", "yhat_upper"]]
+        only_y = result["yhat"].iloc[0]
+        only_y = round(only_y)
+        only_u = result["yhat_upper"].iloc[0]
+        only_u = round(only_u)
+        st.metric(
+            label="Inshallah", value=f"{only_y} - {only_u} Pieces", delta=" 1.1% "
+        )
 
-    with r_col:
-        st_lottie(lottie, height=400, key="robot")
 
 # ----------------- Contact Form ------------
 
