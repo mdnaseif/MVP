@@ -1,11 +1,12 @@
 import streamlit as st
-import datetime
 import requests
 from prophet.serialize import model_from_json
 import pandas as pd
 from streamlit_lottie import st_lottie
 from pathlib import Path
 import streamlit_authenticator as stauth
+from datetime import datetime, timedelta
+
 
 # ------ MODEL PROCESSING -----------
 
@@ -22,11 +23,11 @@ lottie = load_lottie(
 )
 
 
-today = datetime.datetime.now()
-next_day = today.day + 2
-month = today.month
-min_limit = datetime.date(2023, 7, 20)
-max_limit = datetime.date(2023, month, next_day)
+today = datetime.now()
+min_limit = datetime.now() + timedelta(days=-3)
+min_limit = datetime.date(min_limit)
+max_limit = datetime.now() + timedelta(days=+3)
+max_limit = datetime.date(max_limit)
 
 contact_form = """
 <form action="https://formsubmit.co/naseif2002@gmail.com" method="POST">
