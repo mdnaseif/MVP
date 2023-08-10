@@ -82,11 +82,11 @@ with st.container():
         )
         if d != datetime.date(today):
             with st.empty():
-                for seconds in range(5):
+                for seconds in range(7):
                     if seconds == 0:
                         st_lottie(lottie1, height=200, key="loading")
                     time.sleep(1)
-                for seconds in range(2):
+                for seconds in range(3):
                     if seconds == 0:
                         st_lottie(lottie2, height=200, key="finished")
                     time.sleep(1)
