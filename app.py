@@ -84,41 +84,41 @@ def result():
 
             # st.warning(' This is a warning', icon="⚠️")
             st.write("##")
-            st.subheader("Here is the result	:medal:")
-            item = {
-                "ds": d,
-                "day_of_week": d.weekday(),
-                "month": d.month,
-                "day_month": d.day,
-            }
-            df = pd.DataFrame([item.values()], columns=item.keys())
-            result = final_model.predict(df)
-            result = result[["yhat", "yhat_lower", "yhat_upper"]]
-            only_y = result["yhat"].iloc[0]
-            only_y = round(only_y)
-            only_u = result["yhat_upper"].iloc[0]
-            only_u = round(only_u)
+        st.subheader("Here is the result	:medal:")
+        item = {
+            "ds": d,
+            "day_of_week": d.weekday(),
+            "month": d.month,
+            "day_month": d.day,
+        }
+        df = pd.DataFrame([item.values()], columns=item.keys())
+        result = final_model.predict(df)
+        result = result[["yhat", "yhat_lower", "yhat_upper"]]
+        only_y = result["yhat"].iloc[0]
+        only_y = round(only_y)
+        only_u = result["yhat_upper"].iloc[0]
+        only_u = round(only_u)
 
-            prev = d + timedelta(days=-1)
-            prev_item = {
-                "ds": prev,
-                "day_of_week": prev.weekday(),
-                "month": prev.month,
-                "day_month": prev.day,
-            }
-            df1 = pd.DataFrame([prev_item.values()], columns=prev_item.keys())
-            result = final_model.predict(df1)
-            result = result[["yhat", "yhat_lower", "yhat_upper"]]
-            prev_only_u = result["yhat_upper"].iloc[0]
-            prev_only_u = round(prev_only_u)
+        prev = d + timedelta(days=-1)
+        prev_item = {
+            "ds": prev,
+            "day_of_week": prev.weekday(),
+            "month": prev.month,
+            "day_month": prev.day,
+        }
+        df1 = pd.DataFrame([prev_item.values()], columns=prev_item.keys())
+        result = final_model.predict(df1)
+        result = result[["yhat", "yhat_lower", "yhat_upper"]]
+        prev_only_u = result["yhat_upper"].iloc[0]
+        prev_only_u = round(prev_only_u)
 
-            pers = only_u - prev_only_u
+        pers = only_u - prev_only_u
 
-            st.metric(
-                label="Inshallah",
-                value=f"{only_y} - {only_u} Pieces",
-                delta=f"{pers} pc",
-            )
+        st.metric(
+            label="Inshallah",
+            value=f"{only_y} - {only_u} Pieces",
+            delta=f"{pers} pc",
+        )
 
 
 with st.container():
