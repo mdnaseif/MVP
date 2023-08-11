@@ -5,7 +5,6 @@ import pandas as pd
 from streamlit_lottie import st_lottie
 from datetime import datetime, timedelta
 import time
-import plotly.express as px
 import plotly.graph_objs as go
 
 
