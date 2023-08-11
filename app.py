@@ -3,10 +3,10 @@ import requests
 from prophet.serialize import model_from_json
 import pandas as pd
 from streamlit_lottie import st_lottie
-from pathlib import Path
-import streamlit_authenticator as stauth
 from datetime import datetime, timedelta
 import time
+import plotly.express as px
+import plotly.graph_objs as go
 
 
 # ------ MODEL PROCESSING -----------
@@ -62,8 +62,48 @@ with st.container():
         "Hi Please note that this is a beta version for  testing the product we know its (slow-sucks)"
     )
 
+def graph(df,val):
+    df["y"] = val["y"]
+    fig = go.Figure([
+        go.Scatter(
+            name='الحد الأعلى المتوقع',
+            x=df['ds'],
+            y=df['yhat_upper'],
+            mode='lines+markers',
+            marker=dict(color='#2E6E65'),
+            line=dict(width=3),
 
-def result():
+        ),
+        go.Scatter(
+            name="الحد الادنى المتوقع",
+            x=df['ds'],
+            y=df['yhat'],
+            mode='lines+markers',
+            line=dict(color="#86EE60",width = 3),
+            fillcolor='rgba(134, 238, 96, 0.3)',
+            fill='tonexty',
+        ),
+        go.Scatter(
+            name="الفعلي",
+            x=df['ds'],
+            y=df['y'],
+            mode='lines+markers',
+            line=dict(color="#05BFDB",width = 3),
+            fillcolor='rgba(5, 191, 219, 0.3)',
+            fill='tonexty',
+
+        ),
+
+    ])
+    fig.update_layout(
+        yaxis_title='الكمية',
+        title='أداء المنتج الأسبوع الماضي',
+        hovermode="x"
+    )
+    return fig
+
+
+def result(file_name):
     d = st.date_input(
         "Please choose a date to forecast",
         setDate,
@@ -73,11 +113,11 @@ def result():
     )
     if d != setDate:
         with st.empty():
-            for seconds in range(7):
+            for seconds in range(1):
                 if seconds == 0:
                     st_lottie(lottie1, height=200, key="loading")
                 time.sleep(1)
-            for seconds in range(3):
+            for seconds in range(1):
                 if seconds == 0:
                     st_lottie(lottie2, height=200, key="done")
                 time.sleep(1)
@@ -120,6 +160,16 @@ def result():
             delta=f"{pers} pc",
         )
 
+        val = pd.read_csv(file_name, encoding="utf-8")
+        chart_data = final_model.predict(val)
+        chart_data = chart_data[["ds","yhat", "yhat_lower", "yhat_upper"]]
+        chart_data = chart_data.round({"yhat": 0, "yhat_lower": 0, "yhat_upper": 0})
+        chart_data["ds"] = chart_data["ds"].dt.date
+        fig = graph(chart_data,val)
+
+        st.plotly_chart(fig, use_container_width=True)
+        
+
 
 with st.container():
     st.write("---")
@@ -132,27 +182,27 @@ with st.container():
     if choosenItem == "Brew Tea":
         with open("بروتي-.json", "r") as fin:
             final_model = model_from_json(fin.read())
-        result()
+        result("بروتي-.csv")
 
     if choosenItem == "Cold Brew":
         with open("كولد برو-.json", "r") as fin:
             final_model = model_from_json(fin.read())
-        result()
+        result("كولد برو-.csv")
 
     if choosenItem == "Iced Tea":
         with open("شاي مثلج - توت ورمان-.json", "r") as fin:
             final_model = model_from_json(fin.read())
-        result()
+        result("شاي مثلج - توت ورمان-.csv")
 
     if choosenItem == "Yousfi":
         with open("شاي مثلج - يوسفي-.json", "r") as fin:
             final_model = model_from_json(fin.read())
-        result()
+        result("شاي مثلج - يوسفي-.csv")
 
     if choosenItem == "Cascara":
         with open("كاسكارا-.json", "r") as fin:
             final_model = model_from_json(fin.read())
-        result()
+        result("كاسكارا-.csv")
 
 
 # ----------------- Contact Form ------------
