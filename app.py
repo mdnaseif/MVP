@@ -112,11 +112,11 @@ def result(file_name):
     )
     if d != setDate:
         with st.empty():
-            for seconds in range(1):
+            for seconds in range(5):
                 if seconds == 0:
                     st_lottie(lottie1, height=200, key="loading")
                 time.sleep(1)
-            for seconds in range(1):
+            for seconds in range(3):
                 if seconds == 0:
                     st_lottie(lottie2, height=200, key="done")
                 time.sleep(1)
