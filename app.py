@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 
 
 # ------ MODEL PROCESSING -----------
-st.set_page_config(page_title="SuitAi - Assin!", page_icon=":tada:", layout="wide")
+st.set_page_config(page_title="SuitAi - Assin!", page_icon=":cactus:", layout="wide")
 
 
 def load_lottie(url):
@@ -54,18 +54,21 @@ def read_css(file_name):
 
 
 with st.container():
-    st.title("Suit Ai 	:cactus:")
-    st.subheader("Your Business is more Intilligent with AI :white_check_mark:")
-    st.write("[Our Website](https://suitai.wuiltweb.com/)")
+    st.image("SuitAi.png")
+    #st.title("Suit Ai 	:cactus:")
+    st.title("Your Business is more Intilligent with AI :white_check_mark:")
+    st.subheader("[Our Website](https://suitsai.wuiltweb.com/)")
     st.write(
-        "Hi Please note that this is a beta version for  testing the product we know its (slow-sucks)"
+        "Hi Please note that this is a beta version for testing the product we know its (slow-sucks)"
     )
+
+
 
 def graph(df,val):
     df["y"] = val["y"]
     fig = go.Figure([
         go.Scatter(
-            name='الحد الأعلى المتوقع',
+            name="Upper Forecasted",
             x=df['ds'],
             y=df['yhat_upper'],
             mode='lines+markers',
@@ -74,7 +77,7 @@ def graph(df,val):
 
         ),
         go.Scatter(
-            name="الحد الادنى المتوقع",
+            name="Lower Forecasted",
             x=df['ds'],
             y=df['yhat'],
             mode='lines+markers',
@@ -83,7 +86,7 @@ def graph(df,val):
             fill='tonexty',
         ),
         go.Scatter(
-            name="الفعلي",
+            name="Actual",
             x=df['ds'],
             y=df['y'],
             mode='lines+markers',
@@ -95,8 +98,9 @@ def graph(df,val):
 
     ])
     fig.update_layout(
-        yaxis_title='الكمية',
-        title='أداء المنتج الأسبوع الماضي',
+        yaxis_title="Amount",
+        xaxis_title="Date",
+        title="Performance Over last week",
         hovermode="x"
     )
     return fig
@@ -112,7 +116,7 @@ def result(file_name):
     )
     if d != setDate:
         with st.empty():
-            for seconds in range(5):
+            for seconds in range(3):
                 if seconds == 0:
                     st_lottie(lottie1, height=200, key="loading")
                 time.sleep(1)
@@ -121,7 +125,7 @@ def result(file_name):
                     st_lottie(lottie2, height=200, key="done")
                 time.sleep(1)
 
-            # st.warning(' This is a warning', icon="⚠️")
+            
             st.write("##")
         st.subheader("Here is the result	:medal:")
         item = {
@@ -158,6 +162,11 @@ def result(file_name):
             value=f"{only_y} - {only_u} Pieces",
             delta=f"{pers} pc",
         )
+        if d.weekday() == 3 or d.weekday() == 4 :
+            st.warning('Example: The date you choosed is a weekend please consider choosing the upper limit', icon="⚠️")
+        else:
+            st.warning('Example: We noticed That the date you choosed there will be a drop in the sales we reccomend you to choose the lower limit', icon="⚠️")
+
 
         val = pd.read_csv(file_name, encoding="utf-8")
         chart_data = final_model.predict(val)
