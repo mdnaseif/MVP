@@ -158,9 +158,9 @@ def result(file_name):
         pers = only_u - prev_only_u
 
         st.metric(
-            label="Inshallah",
-            value=f"{only_y} - {only_u} Pieces",
-            delta=f"{pers} pc",
+            label="Forecasted Demand",
+            value=f"{only_y} - {only_u} Cups",
+            delta=f"{pers} cups from Yesterday",
         )
         if d.weekday() == 3 or d.weekday() == 4 :
             st.warning('Example: The date you choosed is a weekend please consider choosing the upper limit', icon="⚠️")
