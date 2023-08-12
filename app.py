@@ -165,7 +165,7 @@ def result(file_name):
         chart_data = chart_data.round({"yhat": 0, "yhat_lower": 0, "yhat_upper": 0})
         chart_data["ds"] = chart_data["ds"].dt.date
         fig = graph(chart_data,val)
-
+        st.write("##")
         st.plotly_chart(fig, use_container_width=True)
         
 
