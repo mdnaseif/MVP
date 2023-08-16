@@ -80,6 +80,7 @@ def graph(df,val):
             name="Lower Forecasted",
             x=df['ds'],
             y=df['yhat'],
+            #round(df['yhat'] + ((df['yhat_upper'] - df['yhat']) / 2 )),
             mode='lines+markers',
             line=dict(color="#86EE60",width = 3),
             fillcolor='rgba(134, 238, 96, 0.3)',
@@ -139,6 +140,7 @@ def result(file_name):
         result = result[["yhat", "yhat_lower", "yhat_upper"]]
         only_y = result["yhat"].iloc[0]
         only_y = round(only_y)
+
         only_u = result["yhat_upper"].iloc[0]
         only_u = round(only_u)
 
