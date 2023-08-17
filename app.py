@@ -2,38 +2,45 @@ import streamlit as st
 import requests
 from prophet.serialize import model_from_json
 import pandas as pd
+import json
 from streamlit_lottie import st_lottie
 from datetime import datetime, timedelta
 import time
 import plotly.graph_objs as go
+from pymongo import MongoClient
 
 
-# ------ MODEL PROCESSING -----------
+# ------ DB CONFIG -----------
+client = MongoClient("mongodb+srv://MDNASEIF:1928qpwO@mlops.la0z4v1.mongodb.net/?retryWrites=true&w=majority")
+db = client.assin
+collection = db["models"]
+
+
+# ------ WEB SITTING -----------
 st.set_page_config(page_title="SuitAi - Assin!", page_icon=":cactus:", layout="wide")
 
 
+# ------ Graphic -----------
 def load_lottie(url):
     r = requests.get(url)
     if r.status_code != 200:
         return None
     return r.json()
-
-
 lottie1 = load_lottie(
     "https://lottie.host/0fe72a0d-19b4-4cf1-b805-81c1436960ef/pObPi3K16F.json"
 )
-
 lottie2 = load_lottie(
     "https://lottie.host/bc11374a-eb53-4a24-9204-78a3e7ff54c0/50dcPFMMSl.json"
 )
 
-
+# ------ Date sitting -----------
 setDate = datetime.date(datetime.now() + timedelta(days=-2))
 min_limit = datetime.now() + timedelta(days=-3)
 min_limit = datetime.date(min_limit)
 max_limit = datetime.now() + timedelta(days=+3)
 max_limit = datetime.date(max_limit)
 
+# ------ Form -----------
 contact_form = """
 <form action="https://formsubmit.co/naseif2002@gmail.com" method="POST">
     <input type="hidden" name="_captcha" value="false">
@@ -43,14 +50,12 @@ contact_form = """
     <button type="submit">Send</button>
 </form>
 """
-
-
 def read_css(file_name):
     with open(file_name) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
-# ------ HEADER -----------
+# ------ BODY -----------
 
 
 with st.container():
@@ -159,11 +164,21 @@ def result(file_name):
 
         pers = only_u - prev_only_u
 
-        st.metric(
-            label="Forecasted Demand",
-            value=f"{only_y} - {only_u} Cups",
-            delta=f"{pers} cups from Yesterday",
-        )
+        with st.container():
+            agree = st.checkbox('There is AD')
+            if agree:
+                st.metric(
+                    label="Forecasted Demand",
+                    value=f"{only_y+((only_u*1.5)-only_u)} - {only_u*1.5} Cups",
+                    delta=f"{pers} cups from Yesterday",
+                )
+            else:
+                st.metric(
+                    label="Forecasted Demand",
+                    value=f"{only_y} - {only_u} Cups",
+                    delta=f"{pers} cups from Yesterday",
+                )
+
         if d.weekday() == 3 or d.weekday() == 4 :
             st.warning('Example: The date you choosed is a weekend please consider choosing the upper limit', icon="⚠️")
         else:
@@ -178,6 +193,20 @@ def result(file_name):
         fig = graph(chart_data,val)
         st.write("##")
         st.plotly_chart(fig, use_container_width=True)
+
+
+
+
+def mongoModel(id):
+    model = []
+    result = collection.find({"date":str(datetime.date(datetime.now())), "itemId":id})
+    for doc in result:
+        model.append(doc)
+    model = model[0]
+    model = model["model"]
+    model = json.dumps(model)
+    model = model_from_json(model)
+    return model
         
 
 
@@ -188,31 +217,28 @@ with st.container():
         "please chose the item to forecast",
         ["Choose Item", "Iced Tea", "Yousfi", "Cascara", "Cold Brew", "Brew Tea"],
     )
+    if choosenItem == "Cascara":
+        final_model = mongoModel(1)
+        result("كاسكارا-.csv")
 
     if choosenItem == "Brew Tea":
-        with open("بروتي-.json", "r") as fin:
-            final_model = model_from_json(fin.read())
+        final_model = mongoModel(2)
         result("بروتي-.csv")
-
-    if choosenItem == "Cold Brew":
-        with open("كولد برو-.json", "r") as fin:
-            final_model = model_from_json(fin.read())
-        result("كولد برو-.csv")
-
+        
     if choosenItem == "Iced Tea":
-        with open("شاي مثلج - توت ورمان-.json", "r") as fin:
-            final_model = model_from_json(fin.read())
+        final_model = mongoModel(3)
         result("شاي مثلج - توت ورمان-.csv")
 
     if choosenItem == "Yousfi":
-        with open("شاي مثلج - يوسفي-.json", "r") as fin:
-            final_model = model_from_json(fin.read())
+        final_model = mongoModel(4)
         result("شاي مثلج - يوسفي-.csv")
 
-    if choosenItem == "Cascara":
-        with open("كاسكارا-.json", "r") as fin:
-            final_model = model_from_json(fin.read())
-        result("كاسكارا-.csv")
+    if choosenItem == "Cold Brew":
+        final_model = mongoModel(5)
+        result("كولد برو-.csv")
+
+
+
 
 
 # ----------------- Contact Form ------------
