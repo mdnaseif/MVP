@@ -169,7 +169,7 @@ def result(file_name):
             if agree:
                 st.metric(
                     label="Forecasted Demand",
-                    value=f"{only_y+((only_u*1.5)-only_u)} - {only_u*1.5} Cups",
+                    value=f"{round(only_y+((only_u*1.5)-only_u))} - {round(only_u*1.5)} Cups",
                     delta=f"{pers} cups from Yesterday",
                 )
             else:
@@ -224,7 +224,7 @@ with st.container():
     if choosenItem == "Brew Tea":
         final_model = mongoModel(2)
         result("بروتي-.csv")
-        
+
     if choosenItem == "Iced Tea":
         final_model = mongoModel(3)
         result("شاي مثلج - توت ورمان-.csv")
