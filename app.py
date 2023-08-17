@@ -77,27 +77,36 @@ def graph(df,val):
             x=df['ds'],
             y=df['yhat_upper'],
             mode='lines+markers',
-            marker=dict(color='#2E6E65'),
+            marker=dict(color='#86EE60'),
             line=dict(width=3),
 
         ),
         go.Scatter(
-            name="Lower Forecasted",
+            name="Forecasted",
             x=df['ds'],
             y=df['yhat'],
             #round(df['yhat'] + ((df['yhat_upper'] - df['yhat']) / 2 )),
             mode='lines+markers',
             line=dict(color="#86EE60",width = 3),
             fillcolor='rgba(134, 238, 96, 0.3)',
-            fill='tonexty',
-        ),
+            fill='tonexty',),
         go.Scatter(
             name="Actual",
             x=df['ds'],
             y=df['y'],
             mode='lines+markers',
             line=dict(color="#05BFDB",width = 3),
-            fillcolor='rgba(5, 191, 219, 0.3)',
+            fillcolor='rgba(134, 238, 96, 0.3)',
+            fill='tonexty',
+
+        ),
+        go.Scatter(
+            name="Lower Forecasted",
+            x=df['ds'],
+            y=df['yhat_lower'],
+            mode='lines+markers',
+            line=dict(color='#2E6E65',width = 3),
+            fillcolor='rgba(134, 238, 96, 0.3)',
             fill='tonexty',
 
         ),
@@ -109,8 +118,25 @@ def graph(df,val):
         title="Performance Over last week",
         hovermode="x"
     )
+    
     return fig
 
+def inner_graph(file_name):
+        val = pd.read_csv(file_name, encoding="utf-8")
+        chart_data = final_model.predict(val)
+        chart_data = chart_data[["ds","yhat", "yhat_lower", "yhat_upper"]]
+        chart_data = chart_data.round({"yhat": 0, "yhat_lower": 0, "yhat_upper": 0})
+        chart_data["ds"] = chart_data["ds"].dt.date
+        fig = graph(chart_data,val)
+        st.write("##")
+        st.plotly_chart(fig, use_container_width=True)
+
+
+def reccomendation(d):
+        if d.weekday() == 3 or d.weekday() == 4 :
+            st.warning('Recommendation: The date you choosed is a weekend please consider choosing the upper limit', icon="✨")
+        else:
+            st.warning('Recommendation: We noticed That the date you choosed there will be a drop in the sales we recommends you to choose the lower limit', icon="✨")
 
 def result(file_name):
     d = st.date_input(
@@ -133,7 +159,8 @@ def result(file_name):
 
             
             st.write("##")
-        st.subheader("Here is the result	:medal:")
+  
+        st.subheader("Any Events? :male-teacher:")
         item = {
             "ds": d,
             "day_of_week": d.weekday(),
@@ -165,48 +192,77 @@ def result(file_name):
         pers = only_u - prev_only_u
 
         with st.container():
-            agree = st.checkbox('There is AD')
-            if agree:
-                st.metric(
-                    label="Forecasted Demand",
-                    value=f"{round(only_y+((only_u*1.5)-only_u))} - {round(only_u*1.5)} Cups",
-                    delta=f"{pers} cups from Yesterday",
-                )
-            else:
+            choosenEvent = st.selectbox(
+                "please choose the The event Type",
+                ["Choose Event", "No Event", "Ads", "Offer", "Special Event"],)
+            
+            if choosenEvent == "Choose Event":
+                st.warning('Choosing Type of event will impact the forecasting', icon="⚠️")
+            if choosenEvent == "No Event":
+                st.write("##")
+                st.write("---")
+                st.subheader("Your Results!	:medal:")
                 st.metric(
                     label="Forecasted Demand",
                     value=f"{only_y} - {only_u} Cups",
                     delta=f"{pers} cups from Yesterday",
                 )
+                reccomendation(d)
+                inner_graph(file_name)
 
-        if d.weekday() == 3 or d.weekday() == 4 :
-            st.warning('Example: The date you choosed is a weekend please consider choosing the upper limit', icon="⚠️")
-        else:
-            st.warning('Example: We noticed That the date you choosed there will be a drop in the sales we reccomend you to choose the lower limit', icon="⚠️")
+            if choosenEvent == "Ads":
+                st.write("##")
+                st.write("---")
+                st.subheader("Your Results!	:medal:")
+                st.metric(
+                    label="Forecasted Demand",
+                    value=f"{round(only_y+((only_u*1.75)-only_u))} - {round(only_u*1.75)} Cups",
+                    delta=f"{pers} cups from Yesterday",
+                )
+                reccomendation(d)
+                inner_graph(file_name)
+            if choosenEvent == "Offer":
+                st.write("##")
+                st.write("---")
+                st.subheader("Your Results!	:medal:")
+                st.metric(
+                    label="Forecasted Demand",
+                    value=f"{round(only_y+((only_u*2)-only_u))} - {round(only_u*2)} Cups",
+                    delta=f"{pers} cups from Yesterday",
+                )
+                reccomendation(d)
+                inner_graph(file_name)
+            if choosenEvent == "Special Event":
+                st.write("##")
+                st.write("---")
+                st.subheader("Your Results!	:medal:")
+                st.metric(
+                    label="Forecasted Demand",
+                    value=f"{round(only_y+((only_u*1.5)-only_u))} - {round(only_u*1.5)} Cups",
+                    delta=f"{pers} cups from Yesterday",
+                )
+                reccomendation(d)
+                inner_graph(file_name)
+        
 
 
-        val = pd.read_csv(file_name, encoding="utf-8")
-        chart_data = final_model.predict(val)
-        chart_data = chart_data[["ds","yhat", "yhat_lower", "yhat_upper"]]
-        chart_data = chart_data.round({"yhat": 0, "yhat_lower": 0, "yhat_upper": 0})
-        chart_data["ds"] = chart_data["ds"].dt.date
-        fig = graph(chart_data,val)
-        st.write("##")
-        st.plotly_chart(fig, use_container_width=True)
 
-
-
-
+yesterday = datetime.now() + timedelta(days=-1)
+yesterday = datetime.date(yesterday)
 def mongoModel(id):
     model = []
-    result = collection.find({"date":str(datetime.date(datetime.now())), "itemId":id})
+    if collection.count_documents({ "date": str(datetime.date(datetime.now())) }, limit = 1) != 0:
+        result = collection.find({"date":str(datetime.date(datetime.now())), "itemId":id})
+        pass
+    else:
+        result = collection.find({"date":str(yesterday), "itemId":id})
     for doc in result:
         model.append(doc)
-    model = model[0]
-    model = model["model"]
-    model = json.dumps(model)
-    model = model_from_json(model)
-    return model
+        model = model[0]
+        model = model["model"]
+        model = json.dumps(model)
+        model = model_from_json(model)
+        return model
         
 
 
