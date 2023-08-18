@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import time
 import plotly.graph_objs as go
 from pymongo import MongoClient
+import plotly.express as px
 
 
 # ------ DB CONFIG -----------
@@ -67,15 +68,31 @@ with st.container():
         "Hi Please note that this is a beta version for testing the product we know its (slow-sucks)"
     )
 
-
+colorList = ["#F4F7ED", "#86EE60", "#2E6E65","2B3752"]
+def meangraph(df):
+    df = df
+    df['ds'] = pd.to_datetime(df['ds'])
+    df["weekday"] = df.ds.dt.day_name()
+    df = pd.DataFrame({'count' : df.groupby("weekday")["y"].mean()}).reset_index()
+    df = df.sort_values(by=['count'])
+    df = df.round(0)
+    fig = px.bar(df, x='weekday', y='count',
+                hover_data=['count'], color='count',color_continuous_scale= 'Aggrnyl',
+                labels={'pop':'population of Canada'}, height=400)
+    fig.update_layout(
+            yaxis_title="Amount",
+            xaxis_title="Week Days",
+            title="Mean of weekdays for the last 4 weeks",
+        )
+    return fig
 
 def graph(df,val):
     df["y"] = val["y"]
     fig = go.Figure([
         go.Scatter(
             name="Upper Forecasted",
-            x=df['ds'],
-            y=df['yhat_upper'],
+            x=df['ds'].iloc[-7:],
+            y=df['yhat_upper'].iloc[-7:],
             mode='lines+markers',
             marker=dict(color='#86EE60'),
             line=dict(width=3),
@@ -83,8 +100,8 @@ def graph(df,val):
         ),
         go.Scatter(
             name="Forecasted",
-            x=df['ds'],
-            y=df['yhat'],
+            x=df['ds'].iloc[-7:],
+            y=df['yhat'].iloc[-7:],
             #round(df['yhat'] + ((df['yhat_upper'] - df['yhat']) / 2 )),
             mode='lines+markers',
             line=dict(color="#86EE60",width = 3),
@@ -92,8 +109,8 @@ def graph(df,val):
             fill='tonexty',),
         go.Scatter(
             name="Actual",
-            x=df['ds'],
-            y=df['y'],
+            x=df['ds'].iloc[-7:],
+            y=df['y'].iloc[-7:],
             mode='lines+markers',
             line=dict(color="#05BFDB",width = 3),
             fillcolor='rgba(134, 238, 96, 0.3)',
@@ -102,8 +119,8 @@ def graph(df,val):
         ),
         go.Scatter(
             name="Lower Forecasted",
-            x=df['ds'],
-            y=df['yhat_lower'],
+            x=df['ds'].iloc[-7:],
+            y=df['yhat_lower'].iloc[-7:],
             mode='lines+markers',
             line=dict(color='#2E6E65',width = 3),
             fillcolor='rgba(134, 238, 96, 0.3)',
@@ -130,6 +147,10 @@ def inner_graph(file_name):
         fig = graph(chart_data,val)
         st.write("##")
         st.plotly_chart(fig, use_container_width=True)
+        meanfig = meangraph(val)
+        st.write("##")
+        st.plotly_chart(meanfig, use_container_width=True)
+
 
 
 def reccomendation(d):
@@ -274,23 +295,23 @@ with st.container():
         ["Choose Item", "Iced Tea", "Yousfi", "Cascara", "Cold Brew", "Brew Tea"],
     )
     if choosenItem == "Cascara":
-        final_model = mongoModel(1)
+        final_model = mongoModel(6)
         result("كاسكارا-.csv")
 
     if choosenItem == "Brew Tea":
-        final_model = mongoModel(2)
+        final_model = mongoModel(7)
         result("بروتي-.csv")
 
     if choosenItem == "Iced Tea":
-        final_model = mongoModel(3)
+        final_model = mongoModel(8)
         result("شاي مثلج - توت ورمان-.csv")
 
     if choosenItem == "Yousfi":
-        final_model = mongoModel(4)
+        final_model = mongoModel(9)
         result("شاي مثلج - يوسفي-.csv")
 
     if choosenItem == "Cold Brew":
-        final_model = mongoModel(5)
+        final_model = mongoModel(10)
         result("كولد برو-.csv")
 
 
