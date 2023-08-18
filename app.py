@@ -94,7 +94,7 @@ def graph(df,val):
             x=df['ds'].iloc[-7:],
             y=df['yhat_upper'].iloc[-7:],
             mode='lines+markers',
-            marker=dict(color='#86EE60'),
+            marker=dict(color='#2E6E65'),
             line=dict(width=3),
 
         ),
@@ -291,7 +291,7 @@ with st.container():
     st.write("---")
     st.title("Welcome Assin Cafe :maple_leaf:!")
     choosenItem = st.selectbox(
-        "please chose the item to forecast",
+        "please choose the item to forecast",
         ["Choose Item", "Iced Tea", "Yousfi", "Cascara", "Cold Brew", "Brew Tea"],
     )
     if choosenItem == "Cascara":
