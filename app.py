@@ -68,7 +68,7 @@ with st.container():
         "Hi Please note that this is a beta version for testing the product we know its (slow-sucks)"
     )
 
-colorList = ["#F4F7ED", "#86EE60", "#2E6E65","2B3752"]
+
 def meangraph(df):
     df = df
     df['ds'] = pd.to_datetime(df['ds'])
@@ -78,7 +78,7 @@ def meangraph(df):
     df = df.round(0)
     fig = px.bar(df, x='weekday', y='count',
                 hover_data=['count'], color='count',color_continuous_scale= 'Aggrnyl',
-                labels={'pop':'population of Canada'}, height=400)
+                labels={'pop':'population of Canada'})
     fig.update_layout(
             yaxis_title="Amount",
             xaxis_title="Week Days",
@@ -295,23 +295,23 @@ with st.container():
         ["Choose Item", "Iced Tea", "Yousfi", "Cascara", "Cold Brew", "Brew Tea"],
     )
     if choosenItem == "Cascara":
-        final_model = mongoModel(6)
+        final_model = mongoModel(1)
         result("كاسكارا-.csv")
 
     if choosenItem == "Brew Tea":
-        final_model = mongoModel(7)
+        final_model = mongoModel(2)
         result("بروتي-.csv")
 
     if choosenItem == "Iced Tea":
-        final_model = mongoModel(8)
+        final_model = mongoModel(3)
         result("شاي مثلج - توت ورمان-.csv")
 
     if choosenItem == "Yousfi":
-        final_model = mongoModel(9)
+        final_model = mongoModel(4)
         result("شاي مثلج - يوسفي-.csv")
 
     if choosenItem == "Cold Brew":
-        final_model = mongoModel(10)
+        final_model = mongoModel(5)
         result("كولد برو-.csv")
 
 
