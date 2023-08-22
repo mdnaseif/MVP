@@ -223,58 +223,63 @@ def proccess(file_name, num=0):
         startschool = datetime.date(datetime.strptime("2023-08-20",'%Y-%m-%d'))
         endchool = datetime.date(datetime.strptime("2023-06-22",'%Y-%m-%d'))
         df['isschool'] = df['ds'].apply(lambda x: 1 if x >= startschool or x < endchool else 0)
-        return df , d
+
+        with st.container():
+            choosenEvent = st.selectbox(
+                "please choose the The event Type",
+                ["Choose Event", "No Event", "Ads",  "Special Event"],)
+            
+            if choosenEvent == "Choose Event":
+                st.warning('Choosing Type of event will impact the forecasting', icon="⚠️")
+            if choosenEvent == "No Event":
+                df["isSpecial"].iloc[0] = 0
+                yhat, y_upper = predict(df)
+                st.write("##")
+                st.write("---")
+                st.subheader("Your Results!	:medal:")
+                st.metric(
+                    label="Forecasted Demand",
+                    value=f"{yhat} - {y_upper} Cups",
+                    delta=f"{0} cups from Yesterday",
+                )
+                reccomendation(d)
+                inner_graph(file_name)
+            
+
+            if choosenEvent == "Ads":
+                df["isSpecial"].iloc[0] = 1
+                yhat, y_upper = predict(df)
+                st.write("##")
+                st.write("---")
+                st.subheader("Your Results!	:medal:")
+                st.metric(
+                    label="Forecasted Demand",
+                    value=f"{yhat} - {y_upper} Cups",
+                    delta=f"{0} cups from Yesterday",
+                )
+                reccomendation(d)
+                inner_graph(file_name)
+            if choosenEvent == "Special Event":
+                df["isSpecial"].iloc[0] = 1
+                yhat, y_upper = predict(df)
+                st.write("##")
+                st.write("---")
+                st.subheader("Your Results!	:medal:")
+                st.metric(
+                    label="Forecasted Demand",
+                    value=f"{yhat} - {y_upper} Cups",
+                    delta=f"{0} cups from Yesterday",
+                )
+                reccomendation(d)
+                inner_graph(file_name)
+
+        
+        
         
 
 
-def metrics(file_name):
-    with st.container():
-        choosenEvent = st.selectbox(
-            "please choose the The event Type",
-            ["Choose Event", "No Event", "Ads",  "Special Event"],)
-        
-        if choosenEvent == "Choose Event":
-            st.warning('Choosing Type of event will impact the forecasting', icon="⚠️")
-        if choosenEvent == "No Event":
-            df,d = proccess(file_name)
-            yhat, y_upper = predict(df)
-            st.write("##")
-            st.write("---")
-            st.subheader("Your Results!	:medal:")
-            st.metric(
-                label="Forecasted Demand",
-                value=f"{yhat} - {y_upper} Cups",
-                delta=f"{0} cups from Yesterday",
-            )
-            reccomendation(d)
-            inner_graph(file_name)
 
-        if choosenEvent == "Ads":
-            df,d = proccess(file_name,1)
-            yhat, y_upper = predict(df)
-            st.write("##")
-            st.write("---")
-            st.subheader("Your Results!	:medal:")
-            st.metric(
-                label="Forecasted Demand",
-                value=f"{yhat} - {y_upper} Cups",
-                delta=f"{0} cups from Yesterday",
-            )
-            reccomendation(d)
-            inner_graph(file_name)
-        if choosenEvent == "Special Event":
-            df,d = proccess(file_name,1)
-            yhat, y_upper = predict(df)
-            st.write("##")
-            st.write("---")
-            st.subheader("Your Results!	:medal:")
-            st.metric(
-                label="Forecasted Demand",
-                value=f"{yhat} - {y_upper} Cups",
-                delta=f"{0} cups from Yesterday",
-            )
-            reccomendation(d)
-            inner_graph(file_name)
+
 
 yesterday = datetime.now() + timedelta(days=-1)
 yesterday = datetime.date(yesterday)
@@ -304,23 +309,23 @@ with st.container():
     )
     if choosenItem == "Cascara":
         final_model = mongoModel(1)
-        metrics("كاسكارا-.csv")
+        proccess("كاسكارا-.csv")
 
     if choosenItem == "Brew Tea":
         final_model = mongoModel(2)
-        metrics("بروتي-.csv")
+        proccess("بروتي-.csv")
 
     if choosenItem == "Iced Tea":
         final_model = mongoModel(3)
-        metrics("شاي مثلج - توت ورمان-.csv")
+        proccess("شاي مثلج - توت ورمان-.csv")
 
     if choosenItem == "Yousfi":
         final_model = mongoModel(4)
-        metrics("شاي مثلج - يوسفي-.csv")
+        proccess("شاي مثلج - يوسفي-.csv")
 
     if choosenItem == "Cold Brew":
         final_model = mongoModel(5)
-        metrics("كولد برو-.csv")
+        proccess("كولد برو-.csv")
 
 
 
