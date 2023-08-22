@@ -210,7 +210,7 @@ def proccess(file_name, num=0):
             
             st.write("##")
         isschool = 0
-        st.subheader("Any Events? :male-teacher:")
+        st.subheader("Any Events In the date you choosed? :male-teacher:")
         item = {
             "ds": d,
             "day_of_week": d.weekday(),
