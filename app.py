@@ -153,13 +153,42 @@ def inner_graph(file_name):
 
 
 
+
 def reccomendation(d):
         if d.weekday() == 3 or d.weekday() == 4 :
             st.warning('Recommendation: The date you choosed is a weekend please consider choosing the upper limit', icon="✨")
         else:
             st.warning('Recommendation: We noticed That the date you choosed there will be a drop in the sales we recommends you to choose the lower limit', icon="✨")
 
-def result(file_name):
+
+def predict(df):
+        result = final_model.predict(df)
+        result = result[["yhat", "yhat_lower", "yhat_upper"]]
+        yhat = result["yhat"].iloc[0]
+        yhat = round(yhat)
+
+        y_upper = result["yhat_upper"].iloc[0]
+        y_upper = round(y_upper)
+
+        return yhat, y_upper
+        """prev = d + timedelta(days=-1)
+        prev_item = {
+            "ds": prev,
+            "day_of_week": prev.weekday(),
+            "month": prev.month,
+            "day_month": prev.day,
+        }
+        df1 = pd.DataFrame([prev_item.values()], columns=prev_item.keys())
+        result = final_model.predict(df1)
+        result = result[["yhat", "yhat_lower", "yhat_upper"]]
+        prev_only_u = result["yhat_upper"].iloc[0]
+        prev_only_u = round(prev_only_u)
+
+        pers = only_u - prev_only_u"""
+
+
+
+def proccess(file_name, num=0):
     d = st.date_input(
         "Please choose a date to forecast",
         setDate,
@@ -180,93 +209,72 @@ def result(file_name):
 
             
             st.write("##")
-  
+        isschool = 0
         st.subheader("Any Events? :male-teacher:")
         item = {
             "ds": d,
             "day_of_week": d.weekday(),
             "month": d.month,
             "day_month": d.day,
+            "isSpecial": num,
+            "isschool": isschool
         }
         df = pd.DataFrame([item.values()], columns=item.keys())
-        result = final_model.predict(df)
-        result = result[["yhat", "yhat_lower", "yhat_upper"]]
-        only_y = result["yhat"].iloc[0]
-        only_y = round(only_y)
-
-        only_u = result["yhat_upper"].iloc[0]
-        only_u = round(only_u)
-
-        prev = d + timedelta(days=-1)
-        prev_item = {
-            "ds": prev,
-            "day_of_week": prev.weekday(),
-            "month": prev.month,
-            "day_month": prev.day,
-        }
-        df1 = pd.DataFrame([prev_item.values()], columns=prev_item.keys())
-        result = final_model.predict(df1)
-        result = result[["yhat", "yhat_lower", "yhat_upper"]]
-        prev_only_u = result["yhat_upper"].iloc[0]
-        prev_only_u = round(prev_only_u)
-
-        pers = only_u - prev_only_u
-
-        with st.container():
-            choosenEvent = st.selectbox(
-                "please choose the The event Type",
-                ["Choose Event", "No Event", "Ads", "Offer", "Special Event"],)
-            
-            if choosenEvent == "Choose Event":
-                st.warning('Choosing Type of event will impact the forecasting', icon="⚠️")
-            if choosenEvent == "No Event":
-                st.write("##")
-                st.write("---")
-                st.subheader("Your Results!	:medal:")
-                st.metric(
-                    label="Forecasted Demand",
-                    value=f"{only_y} - {only_u} Cups",
-                    delta=f"{pers} cups from Yesterday",
-                )
-                reccomendation(d)
-                inner_graph(file_name)
-
-            if choosenEvent == "Ads":
-                st.write("##")
-                st.write("---")
-                st.subheader("Your Results!	:medal:")
-                st.metric(
-                    label="Forecasted Demand",
-                    value=f"{round(only_y+((only_u*1.75)-only_u))} - {round(only_u*1.75)} Cups",
-                    delta=f"{pers} cups from Yesterday",
-                )
-                reccomendation(d)
-                inner_graph(file_name)
-            if choosenEvent == "Offer":
-                st.write("##")
-                st.write("---")
-                st.subheader("Your Results!	:medal:")
-                st.metric(
-                    label="Forecasted Demand",
-                    value=f"{round(only_y+((only_u*2)-only_u))} - {round(only_u*2)} Cups",
-                    delta=f"{pers} cups from Yesterday",
-                )
-                reccomendation(d)
-                inner_graph(file_name)
-            if choosenEvent == "Special Event":
-                st.write("##")
-                st.write("---")
-                st.subheader("Your Results!	:medal:")
-                st.metric(
-                    label="Forecasted Demand",
-                    value=f"{round(only_y+((only_u*1.5)-only_u))} - {round(only_u*1.5)} Cups",
-                    delta=f"{pers} cups from Yesterday",
-                )
-                reccomendation(d)
-                inner_graph(file_name)
+        startschool = datetime.date(datetime.strptime("2023-08-20",'%Y-%m-%d'))
+        endchool = datetime.date(datetime.strptime("2023-06-22",'%Y-%m-%d'))
+        df['isschool'] = df['ds'].apply(lambda x: 1 if x >= startschool or x < endchool else 0)
+        return df , d
         
 
 
+def metrics(file_name):
+    with st.container():
+        choosenEvent = st.selectbox(
+            "please choose the The event Type",
+            ["Choose Event", "No Event", "Ads",  "Special Event"],)
+        
+        if choosenEvent == "Choose Event":
+            st.warning('Choosing Type of event will impact the forecasting', icon="⚠️")
+        if choosenEvent == "No Event":
+            df,d = proccess(file_name)
+            yhat, y_upper = predict(df)
+            st.write("##")
+            st.write("---")
+            st.subheader("Your Results!	:medal:")
+            st.metric(
+                label="Forecasted Demand",
+                value=f"{yhat} - {y_upper} Cups",
+                delta=f"{0} cups from Yesterday",
+            )
+            reccomendation(d)
+            inner_graph(file_name)
+
+        if choosenEvent == "Ads":
+            df,d = proccess(file_name,1)
+            yhat, y_upper = predict(df)
+            st.write("##")
+            st.write("---")
+            st.subheader("Your Results!	:medal:")
+            st.metric(
+                label="Forecasted Demand",
+                value=f"{yhat} - {y_upper} Cups",
+                delta=f"{0} cups from Yesterday",
+            )
+            reccomendation(d)
+            inner_graph(file_name)
+        if choosenEvent == "Special Event":
+            df,d = proccess(file_name,1)
+            yhat, y_upper = predict(df)
+            st.write("##")
+            st.write("---")
+            st.subheader("Your Results!	:medal:")
+            st.metric(
+                label="Forecasted Demand",
+                value=f"{yhat} - {y_upper} Cups",
+                delta=f"{0} cups from Yesterday",
+            )
+            reccomendation(d)
+            inner_graph(file_name)
 
 yesterday = datetime.now() + timedelta(days=-1)
 yesterday = datetime.date(yesterday)
@@ -296,23 +304,23 @@ with st.container():
     )
     if choosenItem == "Cascara":
         final_model = mongoModel(1)
-        result("كاسكارا-.csv")
+        metrics("كاسكارا-.csv")
 
     if choosenItem == "Brew Tea":
         final_model = mongoModel(2)
-        result("بروتي-.csv")
+        metrics("بروتي-.csv")
 
     if choosenItem == "Iced Tea":
         final_model = mongoModel(3)
-        result("شاي مثلج - توت ورمان-.csv")
+        metrics("شاي مثلج - توت ورمان-.csv")
 
     if choosenItem == "Yousfi":
         final_model = mongoModel(4)
-        result("شاي مثلج - يوسفي-.csv")
+        metrics("شاي مثلج - يوسفي-.csv")
 
     if choosenItem == "Cold Brew":
         final_model = mongoModel(5)
-        result("كولد برو-.csv")
+        metrics("كولد برو-.csv")
 
 
 
