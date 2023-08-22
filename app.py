@@ -188,7 +188,7 @@ def predict(df):
 
 
 
-def proccess(file_name, num=0):
+def proccess(file_name):
     d = st.date_input(
         "Please choose a date to forecast",
         setDate,
@@ -216,8 +216,9 @@ def proccess(file_name, num=0):
             "day_of_week": d.weekday(),
             "month": d.month,
             "day_month": d.day,
-            "isSpecial": num,
-            "isschool": isschool
+            "isIncrease": 0,
+            "isschool": isschool,
+            "isDrop": 0
         }
         df = pd.DataFrame([item.values()], columns=item.keys())
         startschool = datetime.date(datetime.strptime("2023-08-20",'%Y-%m-%d'))
@@ -227,12 +228,12 @@ def proccess(file_name, num=0):
         with st.container():
             choosenEvent = st.selectbox(
                 "please choose the The event Type",
-                ["Choose Event", "No Event", "Ads",  "Special Event"],)
+                ["Choose Event", "Normal day without events", "We made a promotion for the item",  "Will be a Special Event","A partial close (Drop in sales)"],)
             
             if choosenEvent == "Choose Event":
                 st.warning('Choosing Type of event will impact the forecasting', icon="⚠️")
-            if choosenEvent == "No Event":
-                df["isSpecial"].iloc[0] = 0
+            if choosenEvent == "Normal day without events":
+                df["isIncrease"].iloc[0] = 0
                 yhat, y_upper = predict(df)
                 st.write("##")
                 st.write("---")
@@ -246,8 +247,8 @@ def proccess(file_name, num=0):
                 inner_graph(file_name)
             
 
-            if choosenEvent == "Ads":
-                df["isSpecial"].iloc[0] = 1
+            if choosenEvent == "We made a promotion for the item":
+                df["isIncrease"].iloc[0] = 1
                 yhat, y_upper = predict(df)
                 st.write("##")
                 st.write("---")
@@ -259,8 +260,22 @@ def proccess(file_name, num=0):
                 )
                 reccomendation(d)
                 inner_graph(file_name)
-            if choosenEvent == "Special Event":
-                df["isSpecial"].iloc[0] = 1
+            if choosenEvent == "Will be a Special Event":
+                df["isIncrease"].iloc[0] = 1
+                yhat, y_upper = predict(df)
+                st.write("##")
+                st.write("---")
+                st.subheader("Your Results!	:medal:")
+                st.metric(
+                    label="Forecasted Demand",
+                    value=f"{yhat} - {y_upper} Cups",
+                    delta=f"{0} cups from Yesterday",
+                )
+                reccomendation(d)
+                inner_graph(file_name)
+
+            if choosenEvent == "A partial close (Drop in sales)":
+                df["isDrop"].iloc[0] = 1
                 yhat, y_upper = predict(df)
                 st.write("##")
                 st.write("---")
@@ -308,23 +323,23 @@ with st.container():
         ["Choose Item", "Iced Tea", "Yousfi", "Cascara", "Cold Brew", "Brew Tea"],
     )
     if choosenItem == "Cascara":
-        final_model = mongoModel(1)
+        final_model = mongoModel(6)
         proccess("كاسكارا-.csv")
 
     if choosenItem == "Brew Tea":
-        final_model = mongoModel(2)
+        final_model = mongoModel(7)
         proccess("بروتي-.csv")
 
     if choosenItem == "Iced Tea":
-        final_model = mongoModel(3)
+        final_model = mongoModel(8)
         proccess("شاي مثلج - توت ورمان-.csv")
 
     if choosenItem == "Yousfi":
-        final_model = mongoModel(4)
+        final_model = mongoModel(9)
         proccess("شاي مثلج - يوسفي-.csv")
 
     if choosenItem == "Cold Brew":
-        final_model = mongoModel(5)
+        final_model = mongoModel(10)
         proccess("كولد برو-.csv")
 
 
