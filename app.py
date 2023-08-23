@@ -323,23 +323,23 @@ with st.container():
         ["Choose Item", "Iced Tea", "Yousfi", "Cascara", "Cold Brew", "Brew Tea"],
     )
     if choosenItem == "Cascara":
-        final_model = mongoModel(6)
+        final_model = mongoModel(1)
         proccess("كاسكارا-.csv")
 
     if choosenItem == "Brew Tea":
-        final_model = mongoModel(7)
+        final_model = mongoModel(2)
         proccess("بروتي-.csv")
 
     if choosenItem == "Iced Tea":
-        final_model = mongoModel(8)
+        final_model = mongoModel(3)
         proccess("شاي مثلج - توت ورمان-.csv")
 
     if choosenItem == "Yousfi":
-        final_model = mongoModel(9)
+        final_model = mongoModel(4)
         proccess("شاي مثلج - يوسفي-.csv")
 
     if choosenItem == "Cold Brew":
-        final_model = mongoModel(10)
+        final_model = mongoModel(5)
         proccess("كولد برو-.csv")
 
 
