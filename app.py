@@ -34,12 +34,7 @@ lottie2 = load_lottie(
     "https://lottie.host/bc11374a-eb53-4a24-9204-78a3e7ff54c0/50dcPFMMSl.json"
 )
 
-# ------ Date sitting -----------
-setDate = datetime.date(datetime.now() + timedelta(days=-2))
-min_limit = datetime.now() + timedelta(days=-3)
-min_limit = datetime.date(min_limit)
-max_limit = datetime.now() + timedelta(days=+3)
-max_limit = datetime.date(max_limit)
+
 
 # ------ Form -----------
 contact_form = """
@@ -88,10 +83,12 @@ def meangraph(df):
 
 def graph(df,val):
     df["y"] = val["y"]
+    df['ds'] = pd.to_datetime(df['ds'])
+    df["weekday"] = df.ds.dt.day_name()
     fig = go.Figure([
         go.Scatter(
             name="Upper Forecasted",
-            x=df['ds'].iloc[-7:],
+            x=df["weekday"].iloc[-7:],
             y=df['yhat_upper'].iloc[-7:],
             mode='lines+markers',
             marker=dict(color='#2E6E65'),
@@ -100,7 +97,7 @@ def graph(df,val):
         ),
         go.Scatter(
             name="Forecasted",
-            x=df['ds'].iloc[-7:],
+            x=df["weekday"].iloc[-7:],
             y=df['yhat'].iloc[-7:],
             #round(df['yhat'] + ((df['yhat_upper'] - df['yhat']) / 2 )),
             mode='lines+markers',
@@ -109,7 +106,7 @@ def graph(df,val):
             fill='tonexty',),
         go.Scatter(
             name="Actual",
-            x=df['ds'].iloc[-7:],
+            x=df["weekday"].iloc[-7:],
             y=df['y'].iloc[-7:],
             mode='lines+markers',
             line=dict(color="#05BFDB",width = 3),
@@ -119,7 +116,7 @@ def graph(df,val):
         ),
         go.Scatter(
             name="Lower Forecasted",
-            x=df['ds'].iloc[-7:],
+            x=df["weekday"].iloc[-7:],
             y=df['yhat_lower'].iloc[-7:],
             mode='lines+markers',
             line=dict(color='#2E6E65',width = 3),
@@ -129,10 +126,12 @@ def graph(df,val):
         ),
 
     ])
+    startweek= str(datetime.date(df["ds"].iloc[-1]))
+    endweek= str(datetime.date(df["ds"].iloc[-7]))
     fig.update_layout(
         yaxis_title="Amount",
         xaxis_title="Date",
-        title="Performance Over last week",
+        title=f"Performance Over last week, From ({endweek}) until ({startweek}) ",
         hovermode="x"
     )
     
@@ -186,7 +185,12 @@ def predict(df):
 
         pers = only_u - prev_only_u"""
 
-
+# ------ Date sitting -----------
+setDate = datetime.date(datetime.now() + timedelta(days=-2))
+min_limit = datetime.now() + timedelta(days=-3)
+min_limit = datetime.date(min_limit)
+max_limit = datetime.now() + timedelta(days=+3)
+max_limit = datetime.date(max_limit)
 
 def proccess(file_name):
     d = st.date_input(
@@ -197,18 +201,6 @@ def proccess(file_name):
         format="YYYY-MM-DD",
     )
     if d != setDate:
-        with st.empty():
-            for seconds in range(3):
-                if seconds == 0:
-                    st_lottie(lottie1, height=200, key="loading")
-                time.sleep(1)
-            for seconds in range(3):
-                if seconds == 0:
-                    st_lottie(lottie2, height=200, key="done")
-                time.sleep(1)
-
-            
-            st.write("##")
         isschool = 0
         st.subheader("Any Events In the date you choosed? :male-teacher:")
         item = {
@@ -232,61 +224,72 @@ def proccess(file_name):
             
             if choosenEvent == "Choose Event":
                 st.warning('Choosing Type of event will impact the forecasting', icon="⚠️")
-            if choosenEvent == "Normal day without events":
-                df["isIncrease"].iloc[0] = 0
-                yhat, y_upper = predict(df)
-                st.write("##")
-                st.write("---")
-                st.subheader("Your Results!	:medal:")
-                st.metric(
-                    label="Forecasted Demand",
-                    value=f"{yhat} - {y_upper} Cups",
-                    delta=f"{0} cups from Yesterday",
-                )
-                reccomendation(d)
-                inner_graph(file_name)
-            
+            if choosenEvent != "Choose Event":
+                with st.empty():
+                    for seconds in range(3):
+                        if seconds == 0:
+                            st_lottie(lottie1, height=200, key="loading")
+                        time.sleep(1)
+                    for seconds in range(3):
+                        if seconds == 0:
+                            st_lottie(lottie2, height=200, key="done")
+                        time.sleep(1)
+                    st.write("")
+                if choosenEvent == "Normal day without events":
+                    df["isIncrease"].iloc[0] = 0
+                    yhat, y_upper = predict(df)
+                    st.write("##")
+                    st.write("---")
+                    st.subheader("Your Results!	:medal:")
+                    st.metric(
+                        label="Forecasted Demand",
+                        value=f"{yhat} - {y_upper} Cups",
+                        delta=f"{0} cups from Yesterday",
+                    )
+                    reccomendation(d)
+                    inner_graph(file_name)
+                
 
-            if choosenEvent == "We made a promotion for the item":
-                df["isIncrease"].iloc[0] = 1
-                yhat, y_upper = predict(df)
-                st.write("##")
-                st.write("---")
-                st.subheader("Your Results!	:medal:")
-                st.metric(
-                    label="Forecasted Demand",
-                    value=f"{yhat} - {y_upper} Cups",
-                    delta=f"{0} cups from Yesterday",
-                )
-                reccomendation(d)
-                inner_graph(file_name)
-            if choosenEvent == "Will be a Special Event":
-                df["isIncrease"].iloc[0] = 1
-                yhat, y_upper = predict(df)
-                st.write("##")
-                st.write("---")
-                st.subheader("Your Results!	:medal:")
-                st.metric(
-                    label="Forecasted Demand",
-                    value=f"{yhat} - {y_upper} Cups",
-                    delta=f"{0} cups from Yesterday",
-                )
-                reccomendation(d)
-                inner_graph(file_name)
+                if choosenEvent == "We made a promotion for the item":
+                    df["isIncrease"].iloc[0] = 1
+                    yhat, y_upper = predict(df)
+                    st.write("##")
+                    st.write("---")
+                    st.subheader("Your Results!	:medal:")
+                    st.metric(
+                        label="Forecasted Demand",
+                        value=f"{yhat} - {y_upper} Cups",
+                        delta=f"{0} cups from Yesterday",
+                    )
+                    reccomendation(d)
+                    inner_graph(file_name)
+                if choosenEvent == "Will be a Special Event":
+                    df["isIncrease"].iloc[0] = 1
+                    yhat, y_upper = predict(df)
+                    st.write("##")
+                    st.write("---")
+                    st.subheader("Your Results!	:medal:")
+                    st.metric(
+                        label="Forecasted Demand",
+                        value=f"{yhat} - {y_upper} Cups",
+                        delta=f"{0} cups from Yesterday",
+                    )
+                    reccomendation(d)
+                    inner_graph(file_name)
 
-            if choosenEvent == "A partial close (Drop in sales)":
-                df["isDrop"].iloc[0] = 1
-                yhat, y_upper = predict(df)
-                st.write("##")
-                st.write("---")
-                st.subheader("Your Results!	:medal:")
-                st.metric(
-                    label="Forecasted Demand",
-                    value=f"{yhat} - {y_upper} Cups",
-                    delta=f"{0} cups from Yesterday",
-                )
-                reccomendation(d)
-                inner_graph(file_name)
+                if choosenEvent == "A partial close (Drop in sales)":
+                    df["isDrop"].iloc[0] = 1
+                    yhat, y_upper = predict(df)
+                    st.write("##")
+                    st.write("---")
+                    st.subheader("Your Results!	:medal:")
+                    st.metric(
+                        label="Forecasted Demand",
+                        value=f"{yhat} - {y_upper} Cups",
+                        delta=f"{0} cups from Yesterday",
+                    )
+                    reccomendation(d)
+                    inner_graph(file_name)
 
         
         
