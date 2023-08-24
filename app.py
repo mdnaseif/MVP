@@ -152,7 +152,6 @@ def inner_graph(file_name):
 
 
 
-
 def reccomendation(d):
         if d.weekday() == 3 or d.weekday() == 4 :
             st.warning('Recommendation: The date you choosed is a weekend please consider choosing the upper limit', icon="✨")
@@ -210,7 +209,8 @@ def proccess(file_name):
             "day_month": d.day,
             "isIncrease": 0,
             "isschool": isschool,
-            "isDrop": 0
+            "isDrop": 0,
+            "Ads": 0 
         }
         df = pd.DataFrame([item.values()], columns=item.keys())
         startschool = datetime.date(datetime.strptime("2023-08-20",'%Y-%m-%d'))
@@ -251,7 +251,7 @@ def proccess(file_name):
                 
 
                 if choosenEvent == "We made a promotion for the item":
-                    df["isIncrease"].iloc[0] = 1
+                    df["Ads"].iloc[0] = 1
                     yhat, y_upper = predict(df)
                     st.write("##")
                     st.write("---")
@@ -298,7 +298,7 @@ def proccess(file_name):
 
 
 
-
+#---------------- DataBase -------------------------
 yesterday = datetime.now() + timedelta(days=-1)
 yesterday = datetime.date(yesterday)
 def mongoModel(id):
