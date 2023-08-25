@@ -107,7 +107,7 @@ def graph(df,val):
         go.Scatter(
             name="Actual",
             x=df["weekday"].iloc[-7:],
-            y=df['y'].iloc[-7:],
+            y=val['y'].iloc[-7:],
             mode='lines+markers',
             line=dict(color="#05BFDB",width = 3),
             fillcolor='rgba(134, 238, 96, 0.3)',
@@ -137,8 +137,8 @@ def graph(df,val):
     
     return fig
 
-def inner_graph(file_name):
-        val = pd.read_csv(file_name, encoding="utf-8")
+def inner_graph(data):
+        val = data
         chart_data = final_model.predict(val)
         chart_data = chart_data[["ds","yhat", "yhat_lower", "yhat_upper"]]
         chart_data = chart_data.round({"yhat": 0, "yhat_lower": 0, "yhat_upper": 0})
@@ -191,7 +191,7 @@ min_limit = datetime.date(min_limit)
 max_limit = datetime.now() + timedelta(days=+3)
 max_limit = datetime.date(max_limit)
 
-def proccess(file_name):
+def proccess(data):
     d = st.date_input(
         "Please choose a date to forecast",
         setDate,
@@ -247,7 +247,7 @@ def proccess(file_name):
                         delta=f"{0} cups from Yesterday",
                     )
                     reccomendation(d)
-                    inner_graph(file_name)
+                    inner_graph(data)
                 
 
                 if choosenEvent == "We made a promotion for the item":
@@ -262,7 +262,7 @@ def proccess(file_name):
                         delta=f"{0} cups from Yesterday",
                     )
                     reccomendation(d)
-                    inner_graph(file_name)
+                    inner_graph(data)
                 if choosenEvent == "Will be a Special Event":
                     df["isIncrease"].iloc[0] = 1
                     yhat, y_upper = predict(df)
@@ -275,7 +275,7 @@ def proccess(file_name):
                         delta=f"{0} cups from Yesterday",
                     )
                     reccomendation(d)
-                    inner_graph(file_name)
+                    inner_graph(data)
 
                 if choosenEvent == "A partial close (Drop in sales)":
                     df["isDrop"].iloc[0] = 1
@@ -289,7 +289,7 @@ def proccess(file_name):
                         delta=f"{0} cups from Yesterday",
                     )
                     reccomendation(d)
-                    inner_graph(file_name)
+                    inner_graph(data)
 
         
         
@@ -303,19 +303,34 @@ yesterday = datetime.now() + timedelta(days=-1)
 yesterday = datetime.date(yesterday)
 def mongoModel(id):
     model = []
-    if collection.count_documents({ "date": str(datetime.date(datetime.now())) }, limit = 1) != 0:
-        result = collection.find({"date":str(datetime.date(datetime.now())), "itemId":id})
+    if collection.count_documents({ "date": str(datetime.date(datetime.now())), "type":"model" }, limit = 1) != 0:
+        result = collection.find({"date":str(datetime.date(datetime.now())), "itemId":id , "type":"model"})
         pass
     else:
-        result = collection.find({"date":str(yesterday), "itemId":id})
+        result = collection.find({"date":str(yesterday), "itemId":id, "type":"model"})
     for doc in result:
         model.append(doc)
         model = model[0]
         model = model["model"]
+        model = json.loads(model)
         model = json.dumps(model)
         model = model_from_json(model)
         return model
-        
+    
+def mongodata(id):
+    data = []
+    if collection.count_documents({ "date": str(datetime.date(datetime.now())), "itemId":id ,"type":"data" }, limit = 1) != 0:
+        result = collection.find({"date":str(datetime.date(datetime.now())), "itemId":id , "type":"data"})
+        pass
+    else:
+        print("hi")
+    for doc in result:
+        data.append(doc)
+        data = data[0]
+        data = data["data"]
+        df = pd.read_json(data)
+        df['ds']= pd.to_datetime(df['ds'])
+        return df    
 
 
 with st.container():
@@ -327,24 +342,28 @@ with st.container():
     )
     if choosenItem == "Cascara":
         final_model = mongoModel(1)
-        proccess("كاسكارا-.csv")
+        data = mongodata(1)
+        proccess(data)
 
     if choosenItem == "Brew Tea":
         final_model = mongoModel(2)
-        proccess("بروتي-.csv")
+        data = mongodata(2)
+        proccess(data) 
 
     if choosenItem == "Iced Tea":
         final_model = mongoModel(3)
-        proccess("شاي مثلج - توت ورمان-.csv")
+        data = mongodata(3)
+        proccess(data)
 
     if choosenItem == "Yousfi":
         final_model = mongoModel(4)
-        proccess("شاي مثلج - يوسفي-.csv")
+        data = mongodata(4)
+        proccess(data)
 
     if choosenItem == "Cold Brew":
         final_model = mongoModel(5)
-        proccess("كولد برو-.csv")
-
+        data = mongodata(5)
+        proccess(data)
 
 
 
