@@ -82,7 +82,6 @@ def meangraph(df):
     return fig
 
 def graph(df,val):
-    df["y"] = val["y"]
     df['ds'] = pd.to_datetime(df['ds'])
     df["weekday"] = df.ds.dt.day_name()
     fig = go.Figure([
@@ -303,6 +302,7 @@ yesterday = datetime.now() + timedelta(days=-1)
 yesterday = datetime.date(yesterday)
 def mongoModel(id):
     model = []
+    result= ""
     if collection.count_documents({ "date": str(datetime.date(datetime.now())), "type":"model" }, limit = 1) != 0:
         result = collection.find({"date":str(datetime.date(datetime.now())), "itemId":id , "type":"model"})
         pass
@@ -319,12 +319,13 @@ def mongoModel(id):
     
 def mongodata(id):
     data = []
+    docs = ""
     if collection.count_documents({ "date": str(datetime.date(datetime.now())), "itemId":id ,"type":"data" }, limit = 1) != 0:
-        result = collection.find({"date":str(datetime.date(datetime.now())), "itemId":id , "type":"data"})
+        docs = collection.find({"date":str(datetime.date(datetime.now())), "itemId":id , "type":"data"})
         pass
     else:
-        print("hi")
-    for doc in result:
+        docs = collection.find({"date":str(yesterday), "itemId":id , "type":"data"})
+    for doc in docs:
         data.append(doc)
         data = data[0]
         data = data["data"]
